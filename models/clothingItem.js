@@ -29,12 +29,12 @@ const itemSchema = new mongoose.Schema({
     ref: User,
     required: true,
   },
-  likes:
+  likes:[
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: User,
       default: [],
-    },
+    }],
   createdAt: {
     type: Date,
     default: Date.now,

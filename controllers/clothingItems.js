@@ -14,11 +14,13 @@ const getItems = (req, res) => {
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  if (!name || !weather || !imageUrl){
-    return res.status(errorCode.invalidData).send({ message: errorMessage.invalidData})
+  if (!name || !weather || !imageUrl) {
+    return res
+      .status(errorCode.invalidData)
+      .send({ message: errorMessage.invalidData });
   }
   return Item.create({ name, weather, imageUrl, owner: req.user._id })
-    .then((item) => res.status(201).send({ data: item }))
+    .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'ValidationError') {
