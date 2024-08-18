@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const validator = require("validator");
+const validator = require('validator');
 const { JWT_SECRET } = require('../utils/config');
 const { errorCode, errorMessage } = require('../utils/errors');
 const User = require('../models/user');
@@ -28,19 +28,20 @@ const createUser = (req, res) => {
       }
       return bcrypt.hash(password, 10);
     })
-    .then((hash) =>
-      User.create({ name, avatar, email, password: hash }))
-        .then((user) =>
-          res.send({
-            name: user.name,
-            avatar: user.avatar,
-            email: user.email,
-          })
-        )
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then((user) =>
+      res.send({
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      })
+    )
     .catch((err) => {
       console.error(err);
       if (err.message === 'Email already exists') {
-        return res.status(errorCode.conflict).send({ message: errorMessage.existEmail });
+        return res
+          .status(errorCode.conflict)
+          .send({ message: errorMessage.existEmail });
       }
       if (err.name === 'ValidationError') {
         return res
@@ -74,7 +75,9 @@ const login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === 'Incorrect email or password') {
-        return res.status(errorCode.unauthorized).send({ message: errorMessage.incorrectEmailOrPassword });
+        return res
+          .status(errorCode.unauthorized)
+          .send({ message: errorMessage.incorrectEmailOrPassword });
       }
       return res
         .status(errorCode.defaultError)
@@ -92,7 +95,8 @@ const getCurrentUser = (req, res) => {
           .status(errorCode.idNotFound)
           .send({ message: errorMessage.idNotFound });
       }
-      return res.send({ data: user })})
+      return res.send({ data: user });
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -120,30 +124,24 @@ const updateUser = (req, res) => {
       runValidators: true, // the data will be validated before the update
     }
   )
-    .orFail()
+    .orFail(() => new Error('DocumentNotFoundError'))
     .then((updatedUser) => {
       if (!updatedUser) {
         return res.status(errorCode.idNotFound).send({
           message: errorMessage.idNotFound,
         });
       }
-      return res.send({ data: updatedUser });
+      return res.status(200).json({ data: updatedUser });
     })
     .catch((err) => {
       console.error(err);
       if (err.name === 'ValidationError') {
-        return res
-          .status(errorCode.invalidData)
-          .send({ message: errorMessage.validationError });
+        return res.status(errorCode.invalidData).json({ message: errorMessage.validationError });
       }
-      if (err.name === 'DocumentNotFoundError') {
-        return res
-          .status(errorCode.idNotFound)
-          .send({ message: errorMessage.idNotFound });
+      if (err.message === 'DocumentNotFoundError') {
+        return res.status(errorCode.idNotFound).json({ message: errorMessage.idNotFound });
       }
-      return res
-        .status(errorCode.defaultError)
-        .send({ message: errorMessage.defaultError });
+      return res.status(errorCode.defaultError).json({ message: errorMessage.defaultError });
     });
 };
 

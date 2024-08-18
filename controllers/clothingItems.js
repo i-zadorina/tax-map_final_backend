@@ -37,20 +37,33 @@ const createItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  Item.findByIdAndRemove(itemId)
+  const userId = req.user._id;
+  Item.findById(itemId)
     .orFail()
-    .then(() => res.send({ message: 'Successfully deleted' }))
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        const error = new Error();
+        error.name = "Access Denied";
+        throw error;
+      }
+  return Item.findByIdAndRemove(itemId)})
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
+      if (err.name === "Access Denied") {
+        return res
+          .status(errorCode.accessDenied)
+          .send({ message: `${errorMessage.accessDenied} to delete this item` });
+      }
+      if (err.name === "ValidationError" || err.name === 'CastError') {
+        return res
+          .status(errorCode.invalidData)
+          .send({ message: errorMessage.invalidData });
+      }
       if (err.name === 'DocumentNotFoundError') {
         return res
           .status(errorCode.idNotFound)
           .send({ message: errorMessage.idNotFound });
-      }
-      if (err.name === 'CastError') {
-        return res
-          .status(errorCode.invalidData)
-          .send({ message: errorMessage.invalidData });
       }
       return res
         .status(errorCode.defaultError)

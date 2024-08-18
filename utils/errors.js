@@ -1,5 +1,6 @@
 const errorCode = {
   invalidData: 400,
+  accessDenied: 403,
   idNotFound: 404,
   defaultError: 500,
   conflict: 409,
@@ -16,6 +17,7 @@ const errorMessage = {
   incorrectEmailOrPassword: 'Incorrect email or password',
   authorizationRequired:"Authorization required",
   existEmail: 'Email already exist',
+  messageAccessDeniedError: 'Access denied',
 };
 
 module.exports = { errorCode, errorMessage };
