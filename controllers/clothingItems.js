@@ -3,7 +3,7 @@ const { errorCode, errorMessage } = require('../utils/errors');
 
 const getItems = (req, res) => {
   Item.find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.send(items))
     .catch((err) => {
       console.error(err);
       return res
@@ -11,6 +11,7 @@ const getItems = (req, res) => {
         .send({ message: errorMessage.defaultError });
     });
 };
+
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
@@ -20,7 +21,7 @@ const createItem = (req, res) => {
       .send({ message: errorMessage.invalidData });
   }
   return Item.create({ name, weather, imageUrl, owner: req.user._id })
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'ValidationError') {
@@ -38,7 +39,7 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   Item.findByIdAndRemove(itemId)
     .orFail()
-    .then(() => res.status(200).send({ message: 'Successfully deleted' }))
+    .then(() => res.send({ message: 'Successfully deleted' }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -57,6 +58,26 @@ const deleteItem = (req, res) => {
     });
 };
 
+const updateItem = (req, res) => {
+  const { itemId } = req.params;
+  const { imageUrl } = req.body;
+
+  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
+    .orFail()
+    .then((item) => res.status(OK).send({ data: item }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res
+          .status(errorCode.invalidData)
+          .send({ message: `${errorMessage.invalidData} from updateItem` });
+      }
+      return res
+        .status(errorCode.defaultError)
+        .send({ message: `${errorMessage.defaultError} from updateItem` });
+    });
+};
+
 const likeItem = (req, res) => {
   Item.findByIdAndUpdate(
     req.params.itemId,
@@ -64,7 +85,7 @@ const likeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -90,7 +111,7 @@ const dislikeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then(() => res.status(200).send({ message: 'Successfully deleted' }))
+    .then(() => res.send({ message: 'Successfully deleted' }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -113,6 +134,7 @@ module.exports = {
   getItems,
   createItem,
   deleteItem,
+  updateItem,
   likeItem,
   dislikeItem,
 };
