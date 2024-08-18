@@ -1,48 +1,46 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { errorCode, errorMessage } = require('../utils/errors');
+const validator = require("validator");
 const { JWT_SECRET } = require('../utils/config');
+const { errorCode, errorMessage } = require('../utils/errors');
 const User = require('../models/user');
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  if (!email || !password) {
+  if (!email) {
     return res
       .status(errorCode.invalidData)
       .send({ message: errorMessage.requiredEmailAndPassword });
   }
-  return User.findOne({ email }).select("+password")
+  if (!validator.isEmail(email)) {
+    return res
+      .status(errorCode.invalidData)
+      .send({ message: errorMessage.invalidEmail });
+  }
+  return User.findOne({ email })
     .then((existingEmail) => {
       if (existingEmail) {
         const error = new Error('Email already exists');
-        error.code = 11000;
-        error.name = "DuplicateError";
+        // error.code = 11000;
+        // error.name = 'DuplicateError';
         throw error;
       }
       return bcrypt.hash(password, 10);
     })
     .then((hash) =>
-      User.create({ name, avatar, email, password: hash })
-        .then((matched) => {
-          if (!matched) {
-            // the hashes didn't match, rejecting the promise
-            return Promise.reject(new Error('Incorrect password or email'));
-          }
-          // successful authentication
-          return res.send({ message: 'Everything good!' }); // or token
-        })
-        .then((user) => res.send({
-          name: user.name,
-          avatar: user.avatar,
-          email: user.email,
-          // data: user
-        }))
-    )
+      User.create({ name, avatar, email, password: hash }))
+        .then((user) =>
+          res.send({
+            name: user.name,
+            avatar: user.avatar,
+            email: user.email,
+          })
+        )
     .catch((err) => {
       console.error(err);
-      if (err.name === "DuplicateError" || err.code === 11000) {
-        return res.status(409).send({ message: 'Email already exist' });
+      if (err.message === 'Email already exists') {
+        return res.status(errorCode.conflict).send({ message: errorMessage.existEmail });
       }
       if (err.name === 'ValidationError') {
         return res
@@ -62,18 +60,21 @@ const login = (req, res) => {
       .status(errorCode.invalidData)
       .send({ message: errorMessage.requiredEmailAndPassword });
   }
-  return User.findUserByCredentials({email, password})
+  if (!validator.isEmail(email)) {
+    return res
+      .status(errorCode.invalidData)
+      .send({ message: errorMessage.invalidEmail });
+  }
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: '7d',
       });
-      res.send({ token });
+      return res.send({ token });
     })
     .catch((err) => {
-      if (err.message === "Incorrect email or password") {
-        return res
-          .status(401)
-          .send({ message: "Incorrect email or password" });
+      if (err.message === 'Incorrect email or password') {
+        return res.status(errorCode.unauthorized).send({ message: errorMessage.incorrectEmailOrPassword });
       }
       return res
         .status(errorCode.defaultError)
@@ -82,10 +83,16 @@ const login = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  // const { userId } = req.params;
-  User.findById(req.user._id)
+  const userId = req.user._id;
+  User.findById(userId)
     .orFail()
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(errorCode.idNotFound)
+          .send({ message: errorMessage.idNotFound });
+      }
+      res.send({ data: user })})
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -106,18 +113,22 @@ const getCurrentUser = (req, res) => {
 
 const updateUser = (req, res) => {
   User.findByIdAndUpdate(
-    req.user._id,  { name: req.body.name, avatar: req.body.avatar },
+    req.user._id,
+    { name: req.body.name, avatar: req.body.avatar },
     {
       new: true, // the then handler receives the updated entry as input
       runValidators: true, // the data will be validated before the update
     }
   )
-  .orFail().then((user) => res.send({ data: user }))
-//     .then((user) => {
-//       if (!user) {
-//       return res.status(404).send({ message: "user not found" });
-//     }
-//     return res.status(200).json({ data: user });})
+    .orFail()
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(errorCode.idNotFound).send({
+          message: errorMessage.idNotFound,
+        });
+      }
+      return res.send({ data: updatedUser });
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === 'ValidationError') {
