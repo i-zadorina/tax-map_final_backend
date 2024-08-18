@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const indexRouter = require('./routes/index');
 const cors = require("cors");
+const indexRouter = require('./routes/index');
 
 const { PORT = 3001 } = process.env;
 const app = express();

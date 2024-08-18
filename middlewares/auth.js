@@ -23,7 +23,7 @@ const auth = (req, res, next) => {
 
   req.user = payload; // assigning the payload to the request object
 
-  next(); // sending the request to the next middleware
+  return next(); // sending the request to the next middleware
 };
 
 module.exports=auth;

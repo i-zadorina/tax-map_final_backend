@@ -12,9 +12,7 @@ const errorMessage = {
   idNotFound: "Requested resource not found",
   defaultError: "An error has occurred on the server",
   validationError: "Validation failed",
-  requiredEmail: "An email address is required",
-  // invalidData_URL: "Invalid image URL",
-  // invalidData_Item_Id: "Invalid itemId",
+  requiredEmailAndPassword: "The email and password fields are required",
 };
 
 module.exports = { errorCode, errorMessage };

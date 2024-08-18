@@ -1,8 +1,8 @@
-const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { errorCode, errorMessage } = require('../utils/errors');
 const { JWT_SECRET } = require('../utils/config');
+const User = require('../models/user');
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -10,9 +10,9 @@ const createUser = (req, res) => {
   if (!email || !password) {
     return res
       .status(errorCode.invalidData)
-      .send({ message: errorMessage.requiredEmail });
+      .send({ message: errorMessage.requiredEmailAndPassword });
   }
-  User.findOne({ email }).select("+password")
+  return User.findOne({ email }).select("+password")
     .then((existingEmail) => {
       if (existingEmail) {
         const error = new Error('Email already exists');
@@ -30,7 +30,7 @@ const createUser = (req, res) => {
             return Promise.reject(new Error('Incorrect password or email'));
           }
           // successful authentication
-          res.send({ message: 'Everything good!' }); // or token
+          return res.send({ message: 'Everything good!' }); // or token
         })
         .then((user) => res.send({
           name: user.name,
@@ -59,8 +59,8 @@ const login = (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res
-      .status(400)
-      .send({ message: "The email and password fields are required" });
+      .status(errorCode.invalidData)
+      .send({ message: errorMessage.requiredEmailAndPassword });
   }
   return User.findUserByCredentials({email, password})
     .then((user) => {
@@ -105,15 +105,8 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateUser = (req, res) => {
-  const { name, avatar } = req.body;
-
-//   const updates = {};
-//   if (name) updates.name = name;
-//   if (avatar) updates.avatar = avatar;
-
   User.findByIdAndUpdate(
-    req.user._id, req.body,
-//    updates,
+    req.user._id,  { name: req.body.name, avatar: req.body.avatar },
     {
       new: true, // the then handler receives the updated entry as input
       runValidators: true, // the data will be validated before the update

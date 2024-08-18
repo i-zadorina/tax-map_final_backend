@@ -62,9 +62,9 @@ const updateItem = (req, res) => {
   const { itemId } = req.params;
   const { imageUrl } = req.body;
 
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
+  Item.findByIdAndUpdate(itemId, { $set: { imageUrl } })
     .orFail()
-    .then((item) => res.status(OK).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
