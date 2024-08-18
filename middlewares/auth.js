@@ -5,7 +5,7 @@ const handleAuthError = (res) => {
   res.status(401).send({ message: "Authorization required" });
 };
 
-module.exports.auth = (req, res, next) => {
+const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -25,3 +25,5 @@ module.exports.auth = (req, res, next) => {
 
   next(); // sending the request to the next middleware
 };
+
+module.exports=auth;
