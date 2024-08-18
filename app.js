@@ -15,10 +15,10 @@ mongoose
 .catch(console.error);
 
 app.use(bodyParser.json());
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something broke!' });
-});
+// app.use((err, req, res, next) => {
+//   console.error(err.stack);
+//   res.status(500).json({ message: 'Something broke!' });
+// });
 app.use(cors());
 
 app.use('/', indexRouter);
