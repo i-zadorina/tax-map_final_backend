@@ -92,7 +92,7 @@ const getCurrentUser = (req, res) => {
           .status(errorCode.idNotFound)
           .send({ message: errorMessage.idNotFound });
       }
-      res.send({ data: user })})
+      return res.send({ data: user })})
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
