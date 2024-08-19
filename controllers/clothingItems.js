@@ -15,12 +15,7 @@ const getItems = (req, res) => {
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  if (!name || !weather || !imageUrl) {
-    return res
-      .status(errorCode.invalidData)
-      .send({ message: errorMessage.invalidData });
-  }
-  return Item.create({ name, weather, imageUrl, owner: req.user._id })
+  Item.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);

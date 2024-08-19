@@ -22,9 +22,9 @@ const auth = (req, res, next) => {
     return handleAuthError(res);
   }
 
-  req.user = payload; // assigning the payload to the request object
+  req.user = payload;
 
-  return next(); // sending the request to the next middleware
+  return next();
 };
 
 module.exports=auth;

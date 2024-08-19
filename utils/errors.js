@@ -1,4 +1,5 @@
 const errorCode = {
+  ok: 200,
   invalidData: 400,
   accessDenied: 403,
   idNotFound: 404,

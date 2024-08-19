@@ -9,9 +9,10 @@ const {
 } = require('../controllers/clothingItems');
 const auth = require('../middlewares/auth');
 
+router.get('/',getItems);
+
 router.use(auth);
 
-router.get('/',getItems);
 router.post('/',createItem);
 router.put('/:itemId', updateItem);
 router.delete('/:itemId',deleteItem);

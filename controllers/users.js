@@ -21,10 +21,7 @@ const createUser = (req, res) => {
   return User.findOne({ email })
     .then((existingEmail) => {
       if (existingEmail) {
-        const error = new Error('Email already exists');
-        // error.code = 11000;
-        // error.name = 'DuplicateError';
-        throw error;
+        throw new Error('Email already exists');
       }
       return bcrypt.hash(password, 10);
     })
@@ -89,14 +86,7 @@ const getCurrentUser = (req, res) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(errorCode.idNotFound)
-          .send({ message: errorMessage.idNotFound });
-      }
-      return res.send({ data: user });
-    })
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -120,19 +110,12 @@ const updateUser = (req, res) => {
     req.user._id,
     { name: req.body.name, avatar: req.body.avatar },
     {
-      new: true, // the then handler receives the updated entry as input
-      runValidators: true, // the data will be validated before the update
+      new: true,
+      runValidators: true,
     }
   )
     .orFail(() => new Error('DocumentNotFoundError'))
-    .then((updatedUser) => {
-      if (!updatedUser) {
-        return res.status(errorCode.idNotFound).send({
-          message: errorMessage.idNotFound,
-        });
-      }
-      return res.status(200).json({ data: updatedUser });
-    })
+    .then((updatedUser) => res.status(errorCode.ok).json({ data: updatedUser }))
     .catch((err) => {
       console.error(err);
       if (err.name === 'ValidationError') {
