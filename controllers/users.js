@@ -119,12 +119,18 @@ const updateUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === 'ValidationError') {
-        return res.status(errorCode.invalidData).json({ message: errorMessage.validationError });
+        return res
+          .status(errorCode.invalidData)
+          .json({ message: errorMessage.validationError });
       }
       if (err.message === 'DocumentNotFoundError') {
-        return res.status(errorCode.idNotFound).json({ message: errorMessage.idNotFound });
+        return res
+          .status(errorCode.idNotFound)
+          .json({ message: errorMessage.idNotFound });
       }
-      return res.status(errorCode.defaultError).json({ message: errorMessage.defaultError });
+      return res
+        .status(errorCode.defaultError)
+        .json({ message: errorMessage.defaultError });
     });
 };
 

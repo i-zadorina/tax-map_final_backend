@@ -38,19 +38,20 @@ const deleteItem = (req, res) => {
     .then((item) => {
       if (item.owner.toString() !== userId) {
         const error = new Error();
-        error.name = "Access Denied";
+        error.name = 'Access Denied';
         throw error;
       }
-  return Item.findByIdAndRemove(itemId)})
+      return Item.findByIdAndRemove(itemId);
+    })
     .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
-      if (err.name === "Access Denied") {
-        return res
-          .status(errorCode.accessDenied)
-          .send({ message: `${errorMessage.accessDenied} to delete this item` });
+      if (err.name === 'Access Denied') {
+        return res.status(errorCode.accessDenied).send({
+          message: `${errorMessage.accessDenied} to delete this item`,
+        });
       }
-      if (err.name === "ValidationError" || err.name === 'CastError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res
           .status(errorCode.invalidData)
           .send({ message: errorMessage.invalidData });
@@ -75,7 +76,7 @@ const updateItem = (req, res) => {
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(errorCode.invalidData)
           .send({ message: `${errorMessage.invalidData} from updateItem` });
@@ -93,7 +94,7 @@ const likeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then((item) => res.send({ data: item }))
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
@@ -119,7 +120,7 @@ const dislikeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then(() => res.send({ message: 'Successfully deleted' }))
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
