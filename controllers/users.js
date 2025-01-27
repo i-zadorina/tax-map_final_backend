@@ -2,21 +2,21 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const { JWT_SECRET } = require('../utils/config');
-const { errorCode, errorMessage } = require('../utils/errors');
 const User = require('../models/user');
+const { errorMessage } = require('../utils/error-messages');
+const BadRequestError = require("../utils/errors/BadRequestError");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const UnauthorizedError = require("../utils/errors/UnauthorizedError");
+const ConflictError = require("../utils/errors/ConflictError");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email) {
-    return res
-      .status(errorCode.invalidData)
-      .send({ message: errorMessage.requiredEmailAndPassword });
+    throw new BadRequestError({ message: errorMessage.requiredEmailAndPassword });
   }
   if (!validator.isEmail(email)) {
-    return res
-      .status(errorCode.invalidData)
-      .send({ message: errorMessage.invalidEmail });
+    throw new BadRequestError({ message: errorMessage.invalidEmail });
   }
   return User.findOne({ email })
     .then((existingEmail) => {
@@ -35,33 +35,22 @@ const createUser = (req, res) => {
     )
     .catch((err) => {
       console.error(err);
-      if (err.message === 'Email already exists') {
-        return res
-          .status(errorCode.conflict)
-          .send({ message: errorMessage.existEmail });
-      }
-      if (err.name === 'ValidationError') {
-        return res
-          .status(errorCode.invalidData)
-          .send({ message: errorMessage.validationError });
-      }
-      return res
-        .status(errorCode.defaultError)
-        .send({ message: errorMessage.defaultError });
+      if (err.name === "MongoServerError") {
+        next(new ConflictError("User with this email already exists"));}
+      else if (err.name === 'ValidationError') {
+        next(new BadRequestError("Invalid data"));
+      } else {
+      next(err);}
     });
 };
 
-const login = (req, res) => {
+const login = (req, res,next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(errorCode.invalidData)
-      .send({ message: errorMessage.requiredEmailAndPassword });
+    throw new BadRequestError("Invalid data");
   }
   if (!validator.isEmail(email)) {
-    return res
-      .status(errorCode.invalidData)
-      .send({ message: errorMessage.invalidEmail });
+    throw new BadRequestError(errorMessage.invalidEmail);
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -72,17 +61,14 @@ const login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === 'Incorrect email or password') {
-        return res
-          .status(errorCode.unauthorized)
-          .send({ message: errorMessage.incorrectEmailOrPassword });
+        next(new UnauthorizedError("Authentication error"));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorCode.defaultError)
-        .send({ message: errorMessage.defaultError });
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
@@ -90,22 +76,16 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
-        return res
-          .status(errorCode.idNotFound)
-          .send({ message: errorMessage.idNotFound });
+        next(new NotFoundError({ message: errorMessage.NotFoundError }));
+      } else if (err.name === 'CastError'|| err.name === "ValidationError") {
+        next(new BadRequestError({ message: errorMessage.BadRequestError }));
+      }else {
+        next(err);
       }
-      if (err.name === 'CastError') {
-        return res
-          .status(errorCode.invalidData)
-          .send({ message: errorMessage.invalidData });
-      }
-      return res
-        .status(errorCode.defaultError)
-        .send({ message: errorMessage.defaultError });
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name: req.body.name, avatar: req.body.avatar },
@@ -115,22 +95,16 @@ const updateUser = (req, res) => {
     }
   )
     .orFail(() => new Error('DocumentNotFoundError'))
-    .then((updatedUser) => res.status(errorCode.ok).json({ data: updatedUser }))
+    .then((updatedUser) => res.send({ data: updatedUser }))
     .catch((err) => {
       console.error(err);
-      if (err.name === 'ValidationError') {
-        return res
-          .status(errorCode.invalidData)
-          .json({ message: errorMessage.validationError });
+      if (err.name === "CastError" || err.name === "ValidationError") {
+        next(new BadRequestError({ message: errorMessage.validationError }));
+      } else if (err.name === 'DocumentNotFoundError') {
+        next(new NotFoundError({ message: errorMessage.NotFoundError }));
+      } else {
+        next(err);
       }
-      if (err.message === 'DocumentNotFoundError') {
-        return res
-          .status(errorCode.idNotFound)
-          .json({ message: errorMessage.idNotFound });
-      }
-      return res
-        .status(errorCode.defaultError)
-        .json({ message: errorMessage.defaultError });
     });
 };
 

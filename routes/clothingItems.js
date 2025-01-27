@@ -1,4 +1,6 @@
 const router = require('express').Router();
+
+// Import controllers
 const {
   getItems,
   createItem,
@@ -7,16 +9,22 @@ const {
   likeItem,
   dislikeItem,
 } = require('../controllers/clothingItems');
-const auth = require('../middlewares/auth');
 
-router.get('/',getItems);
+// Import middlewares
+const auth = require('../middlewares/auth');
+const {
+  validateCreateItem,
+  validateItemId,
+} = require('../middlewares/validation');
+
+router.get('/', getItems);
 
 router.use(auth);
 
-router.post('/',createItem);
-router.put('/:itemId', updateItem);
-router.delete('/:itemId',deleteItem);
-router.put('/:itemId/likes',likeItem);
-router.delete('/:itemId/likes',dislikeItem);
+router.post('/', validateCreateItem, createItem);
+router.put('/:itemId', validateItemId, updateItem);
+router.delete('/:itemId', validateItemId, deleteItem);
+router.put('/:itemId/likes', validateItemId, likeItem);
+router.delete('/:itemId/likes', validateItemId, dislikeItem);
 
-module.exports=router;
+module.exports = router;
