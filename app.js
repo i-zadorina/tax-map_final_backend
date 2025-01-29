@@ -1,5 +1,5 @@
-require('dotenv').config();
 //  Import from packages
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -9,6 +9,13 @@ const errorHandler = require('./middlewares/error-handler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
+
+// Server crash testing route
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Server will crash now');
+  }, 0);
+});
 
 //  Import routes index
 const routes = require('./routes/index');
