@@ -1,5 +1,6 @@
-// Import hash encryption
+// Import hash encryption and validation packages
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 
 // Import token handler and signature key
 const jwt = require('jsonwebtoken');
@@ -7,19 +8,14 @@ const { JWT_SECRET } = require('../utils/config');
 
 // Import schema and customized errors
 const User = require('../models/user');
+const { errorMessage } = require('../utils/error-messages');
 const BadRequestError = require("../utils/errors/BadRequestError");
 const NotFoundError = require("../utils/errors/NotFoundError");
 const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 const ConflictError = require("../utils/errors/ConflictError");
-const { errorMessage } = require('../utils/error-messages');
-const validator = require('validator');
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
-
-  if (!validator.isEmail(email)) {
-    return next(new BadRequestError(errorMessage.invalidEmail));
-  }
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
