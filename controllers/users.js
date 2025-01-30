@@ -1,30 +1,27 @@
-const jwt = require('jsonwebtoken');
+// Import hash encryption
 const bcrypt = require('bcryptjs');
-const validator = require('validator');
+
+// Import token handler and signature key
+const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../utils/config');
+
+// Import schema and customized errors
 const User = require('../models/user');
-const { errorMessage } = require('../utils/error-messages');
 const BadRequestError = require("../utils/errors/BadRequestError");
 const NotFoundError = require("../utils/errors/NotFoundError");
 const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 const ConflictError = require("../utils/errors/ConflictError");
+const { errorMessage } = require('../utils/error-messages');
+const validator = require('validator');
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
-  if (!email) {
-    throw new BadRequestError({ message: errorMessage.requiredEmailAndPassword });
-  }
   if (!validator.isEmail(email)) {
-    throw new BadRequestError({ message: errorMessage.invalidEmail });
+    return next(new BadRequestError(errorMessage.invalidEmail));
   }
-  return User.findOne({ email })
-    .then((existingEmail) => {
-      if (existingEmail) {
-        throw new Error('Email already exists');
-      }
-      return bcrypt.hash(password, 10);
-    })
+
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) =>
       res.send({
