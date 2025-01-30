@@ -4,11 +4,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+const app = express();
+
 // Import middleware
-const errorHandler = require('./middlewares/error-handler');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
+const limiter = require('./middlewares/limiter');
+const errorHandler = require('./middlewares/error-handler');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Server crash testing route
 app.get('/crash-test', () => {
@@ -21,7 +24,6 @@ app.get('/crash-test', () => {
 const routes = require('./routes/index');
 
 const { PORT = 3001 } = process.env;
-const app = express();
 
 //  Connect to database
 mongoose
@@ -44,6 +46,8 @@ app.use(errorLogger); // enabling the error logger
 app.use(errors()); // celebrate error handler
 
 app.use(errorHandler); // centralized error handler
+
+app.use(limiter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
