@@ -9,7 +9,7 @@ const app = express();
 // Import middleware
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
-const limiter = require('./middlewares/limiter');
+const { limiter } = require('./middlewares/limiter');
 const errorHandler = require('./middlewares/error-handler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
@@ -38,6 +38,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
+app.use(limiter);
 app.use(requestLogger);
 app.use('/', routes);
 
@@ -47,7 +48,6 @@ app.use(errors()); // celebrate error handler
 
 app.use(errorHandler); // centralized error handler
 
-app.use(limiter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
