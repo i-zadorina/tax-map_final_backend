@@ -1,9 +1,9 @@
-# WTWR (What to Wear?): Back End
+# TaxMap: Back End
 
-Page: [https://wtwr.teachmetofish.net/]
+Page: []
 
-The back-end project is focused on creating a server for the WTWR application. I gained a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
-Front-end repo: [https://github.com/i-zadorina/se_project_react]
+The back-end project is focused on creating a server for the TaxMap application.
+Front-end repo: [https://github.com/i-zadorina/tax-map_final_project]
 
 ## Running the Project
 
@@ -19,5 +19,4 @@ Front-end repo: [https://github.com/i-zadorina/se_project_react]
 - using nodemon to hot reload
 - using ESLint as linter
 - using Prettier to format code
-- using Postman for testing
 - using GitHub Actions for checking code

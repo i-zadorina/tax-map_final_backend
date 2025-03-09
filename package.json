@@ -1,14 +1,14 @@
 {
-  "name": "se_project_express",
+  "name": "tax-map_final_backend",
   "version": "0.1.0",
   "description": "backend project",
+  "author": "Irina Zadorina",
   "main": "app.js",
   "scripts": {
     "lint": "npx eslint .",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "Irina Zadorina",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

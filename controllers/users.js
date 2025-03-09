@@ -9,38 +9,40 @@ const { JWT_SECRET } = require('../utils/config');
 // Import schema and customized errors
 const User = require('../models/user');
 const { errorMessage } = require('../utils/error-messages');
-const BadRequestError = require("../utils/errors/BadRequestError");
-const NotFoundError = require("../utils/errors/NotFoundError");
-const UnauthorizedError = require("../utils/errors/UnauthorizedError");
-const ConflictError = require("../utils/errors/ConflictError");
+const BadRequestError = require('../utils/errors/BadRequestError');
+const NotFoundError = require('../utils/errors/NotFoundError');
+const UnauthorizedError = require('../utils/errors/UnauthorizedError');
+const ConflictError = require('../utils/errors/ConflictError');
 
 const createUser = (req, res, next) => {
-  const { name, avatar, email, password } = req.body;
+  const { email, password, income, status } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({ name, avatar, email, password: hash }))
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ email, password: hash, income, status }))
     .then((user) =>
       res.send({
-        name: user.name,
-        avatar: user.avatar,
+        income: user.income,
+        status: user.status,
         email: user.email,
       })
     )
     .catch((err) => {
       console.error(err);
-      if (err.name === "MongoServerError") {
-        next(new ConflictError("User with this email already exists"));}
-      else if (err.name === 'ValidationError') {
-        next(new BadRequestError("Invalid data"));
+      if (err.name === 'MongoServerError') {
+        next(new ConflictError('User with this name already exists'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Invalid data'));
       } else {
-      next(err);}
+        next(err);
+      }
     });
 };
 
-const login = (req, res,next) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    throw new BadRequestError("Invalid data");
+    throw new BadRequestError('Invalid data');
   }
   if (!validator.isEmail(email)) {
     throw new BadRequestError(errorMessage.invalidEmail);
@@ -54,7 +56,7 @@ const login = (req, res,next) => {
     })
     .catch((err) => {
       if (err.message === 'Incorrect email or password') {
-        next(new UnauthorizedError("Authentication error"));
+        next(new UnauthorizedError('Authentication error'));
       } else {
         next(err);
       }
@@ -70,28 +72,28 @@ const getCurrentUser = (req, res, next) => {
       console.error(err);
       if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError({ message: errorMessage.NotFoundError }));
-      } else if (err.name === 'CastError'|| err.name === "ValidationError") {
+      } else if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError({ message: errorMessage.BadRequestError }));
-      }else {
+      } else {
         next(err);
       }
     });
 };
 
-const updateUser = (req, res, next) => {
+const updateData = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
-    { name: req.body.name, avatar: req.body.avatar },
+    { income: req.body.income, status: req.body.status },
     {
       new: true,
       runValidators: true,
     }
   )
     .orFail(() => new Error('DocumentNotFoundError'))
-    .then((updatedUser) => res.send({ data: updatedUser }))
+    .then((updatedData) => res.send({ data: updatedData }))
     .catch((err) => {
       console.error(err);
-      if (err.name === "CastError" || err.name === "ValidationError") {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError({ message: errorMessage.validationError }));
       } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError({ message: errorMessage.NotFoundError }));
@@ -103,7 +105,7 @@ const updateUser = (req, res, next) => {
 
 module.exports = {
   getCurrentUser,
-  updateUser,
+  updateData,
   createUser,
   login,
 };

@@ -1,11 +1,5 @@
-// Import express router
 const router = require('express').Router();
-
-// Import specific routers
 const userRouter = require('./users');
-const itemRouter = require('./clothingItems');
-
-// Import controllers for signin/up
 const { login, createUser } = require('../controllers/users');
 
 // Import middlewares for validation
@@ -18,10 +12,9 @@ const {
 const NotFoundError = require('../utils/errors/NotFoundError');
 
 // For known endpoints
-router.post('/signin', validateLogin, login);
+router.post('/login', validateLogin, login);
 router.post('/signup', validateCreateUser, createUser);
 
-router.use('/items', itemRouter);
 router.use('/users', userRouter);
 
 // For unknown routes
