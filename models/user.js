@@ -21,10 +21,15 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
   income: {
-    type: String,
+    type: Number,
     required: true,
-    minlength: 2,
-    maxlength: 30,
+    min: 0,
+    validate: {
+      validator(value) {
+        return typeof value === 'number' && !isNaN(value);
+      },
+      message: 'Income must be a valid number',
+    },
   },
   status: {
     type: String,

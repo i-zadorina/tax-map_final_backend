@@ -17,10 +17,9 @@ module.exports.validateCreateUser = celebrate({
     password: Joi.string().required().messages({
       'string.empty': 'The "Password" field must be filled in',
     }),
-    income: Joi.string().required().min(2).max(30).messages({
-      'string.min': 'The minimum length of the "income" field is 2',
-      'string.max': 'The maximum length of the "income" field is 30',
-      'string.empty': 'The "income" field must be filled in',
+    income: Joi.number().required().min(0).messages({
+      'number.min': 'The "income" field must be a positive number',
+      'any.required': 'The "income" field must be filled in',
     }),
     status: Joi.string().valid('single', 'married').required(),
   }),
@@ -40,10 +39,9 @@ module.exports.validateLogin = celebrate({
 
 module.exports.validateDataUpdate = celebrate({
   body: Joi.object().keys({
-    income: Joi.string().required().min(2).max(30).messages({
-      'string.min': 'The minimum length of the "income" field is 2',
-      'string.max': 'The maximum length of the "income" field is 30',
-      'string.empty': 'The "income" field must be filled in',
+    income: Joi.number().required().min(0).messages({
+      'number.min': 'The "income" field must be a positive number',
+      'any.required': 'The "income" field must be filled in',
     }),
     status: Joi.string().valid('single', 'married').required(),
   }),
