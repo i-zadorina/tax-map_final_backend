@@ -1,6 +1,5 @@
 # TaxMap: Back End
 
-- [Page](https://i-zadorina.github.io/tax-map_final_frontend/)
 - [Page](https://tax.imapp.ir/)
 
 The back-end project is focused on creating a server for the TaxMap application.
