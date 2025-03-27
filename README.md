@@ -1,15 +1,9 @@
 # TaxMap: Back End
 
-- [Page](https://i-zadorina.github.io/tax-map_final_frontend/)
-- [Page](https://tax.imapp.ir/)
+- [Page](https://tax.mappuchan.com/)
 
-The back-end project is focused on creating a server for the TaxMap application.
-Front-end repo: [https://github.com/i-zadorina/tax-map_final_frontend]
-
-## Running the Project
-
-`npm run start` — to launch the server
-`npm run dev` — to launch the server with the hot reload feature
+The backend project is focused on creating a server for the TaxMap application.
+Frontend repo: [https://github.com/i-zadorina/tax-map_final_frontend]
 
 ### Features
 
@@ -21,3 +15,4 @@ Front-end repo: [https://github.com/i-zadorina/tax-map_final_frontend]
 - using ESLint as linter
 - using Prettier to format code
 - using GitHub Actions for checking code
+- deployed on Google Cloud
