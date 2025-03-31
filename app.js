@@ -23,7 +23,7 @@ app.get('/crash-test', () => {
 //  Import routes index
 const routes = require('./routes/index');
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3002 } = process.env;
 
 //  Connect to database
 mongoose.set('strictQuery', false);
