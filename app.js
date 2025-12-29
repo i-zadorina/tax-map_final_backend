@@ -24,7 +24,6 @@ app.get('/check', (req, res) => {
   res.status(200).json({ ok: true });
 });
 
-
 //  Import routes index
 const routes = require('./routes/index');
 

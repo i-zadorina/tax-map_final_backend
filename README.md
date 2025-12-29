@@ -1,6 +1,6 @@
 # TaxMap: Back End
 
-- [Page](https://tax.mappuchan.com/)
+- [Page](https://taxesmap.net/)
 
 The backend project is focused on creating a server for the TaxMap application.
 Frontend repo: [https://github.com/i-zadorina/tax-map_final_frontend]
