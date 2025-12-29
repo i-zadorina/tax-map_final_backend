@@ -20,24 +20,29 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
+app.get('/check', (req, res) => {
+  res.status(200).json({ ok: true });
+});
+
+
 //  Import routes index
 const routes = require('./routes/index');
 
-const { PORT = 3002 } = process.env;
+const { PORT = 3002, MONGODB_URI } = process.env;
 
 //  Connect to database
 mongoose.set('strictQuery', false);
 mongoose
-  .connect('mongodb://127.0.0.1:27017/taxmap_db')
-  .then(() => {
-    console.log('Connected to DB');
-  })
-  .catch(console.error);
+  .connect(MONGODB_URI)
+  .then(() => console.log('Connected to DB'))
+  .catch((e) => console.error('Mongo connect error:', e));
 
 //  App's logic
 app.use(bodyParser.json());
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://taxesmap.net', 'https://www.taxesmap.net']
+}));
 
 app.use(limiter);
 app.use(requestLogger);
