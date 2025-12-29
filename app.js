@@ -39,9 +39,13 @@ mongoose
 //  App's logic
 app.use(bodyParser.json());
 
-app.use(cors({
-  origin: ['https://taxesmap.net', 'https://www.taxesmap.net']
-}));
+app.use(
+  cors({
+    origin: ['https://taxesmap.net', 'https://www.taxesmap.net'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 app.use(limiter);
 app.use(requestLogger);
